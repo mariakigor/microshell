@@ -2,6 +2,7 @@
 #include <string.h>
 #include <unistd.h>  //  Do getcwd(), wyswietla aktualna sciezke
 #include <stdlib.h> // Do getenv()
+#include <fcntl.h> // otwieranie plikow
 
 #define PATH_MAX 4096 
 #define MAX_INPUT 1024
@@ -31,6 +32,44 @@ void cd(char *path) {
         }
         
     }
+
+}
+
+void cp(char *source_file, char *dest_file) {
+    if (source_file == NULL) {
+        printf("Missing source file\n");
+    }
+
+    if (dest_file == NULL) {
+        printf("Missing destination file\n");
+    }
+
+    int file, new_file;
+    char buffer[4096];
+    int bytes;
+
+    // plik zrodlowy
+    file = open(source_file, O_RDONLY);
+    if (file == -1) {
+        printf("Cannot open source file\n");
+        close(file);
+        return;
+    }
+
+    // plik docelowy
+    new_file = open(dest_file, O_WRONLY | O_CREAT, 0644);  // O_CREAT wymaga uprawnien 0 specjalne wlasciciel (6 - rw_), grupa (4 - r__), inni (4-r__)
+    if (new_file == -1) {
+        printf("Cannot create destiantion file\n");
+        close(new_file);
+        return;
+    }
+
+    while ( (bytes = read(file, buffer, sizeof(buffer))) > 0 ) {
+        write(new_file, buffer, bytes);
+    }
+
+    close(new_file);
+    close(file);
 
 }
 
@@ -64,6 +103,12 @@ int main() {
             } else {
                 cd(path);
             }
+        }
+        else if (strncmp(input, "cp", 2) == 0) {
+            char *source = strtok(input + 3, " "); // strtok dzieli na tokeny - mniejsze czesci stringa
+            char *destination = strtok(NULL, " ");
+
+            cp(source, destination);
         }
 
     }

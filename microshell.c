@@ -4,6 +4,8 @@
 #include <stdlib.h> // Do getenv()
 #include <fcntl.h> // otwieranie plikow
 #include <ctype.h> // do isspace()
+#include <readline/readline.h>  //bajery do historii i przegladania
+#include <readline/history.h>
 
 #define PATH_MAX 4096 
 #define MAX_INPUT 1024
@@ -98,18 +100,20 @@ void cp(char *source_file, char *dest_file) {
 }
 
 int main() {
-    char input[MAX_INPUT];
+    char *input;
+
+    read_history("history.txt"); //wczytanie historii
 
     while(1) {
 
         znak_zachety();
 
-        // Odczytanie polecenia od użytkownika
-        if (fgets(input, sizeof(input), stdin) == NULL) {
-            break;  
-        }
+        // odczyt polecenia
+        input = readline("");
 
-        // Usuwanie nowej linii, fgets dodaje nowa linie na koncu
+        
+
+        // usuwanie nowej lini
         input[strcspn(input, "\n")] = '\0';
 
         // Gdy exit - koniec programu
@@ -140,6 +144,12 @@ int main() {
 
             cp(source, destination);
         }
+
+        // dodawanie historii
+        add_history(input);
+        write_history("history.txt");
+
+        free(input);
 
     }
     

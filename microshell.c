@@ -3,9 +3,12 @@
 #include <unistd.h>  //  Do getcwd(), wyswietla aktualna sciezke
 #include <stdlib.h> // Do getenv()
 #include <fcntl.h> // otwieranie plikow
+#include <ctype.h> // do isspace()
 
 #define PATH_MAX 4096 
 #define MAX_INPUT 1024
+
+char current_color[20] = "\033[0m";
 
 void znak_zachety() {
     char buf[PATH_MAX]; // Bufor dla sciezki 
@@ -14,19 +17,40 @@ void znak_zachety() {
     const char *host = getenv("NAME"); //host
 
     if ((getcwd(buf, sizeof(buf)) != NULL) && (user != NULL) && (host != NULL)) {
-        printf("%s@%s:[%s] $ ", user, host, buf); // Funkcja zapisuje ścieżkę do bufora
+        printf("%s%s@%s:[%s] %s$ %s", current_color, user, host, buf, current_color, "\033[0m"); // Funkcja zapisuje ścieżkę do bufora
     } else {
         perror("getcwd error"); // Obsługa błędu
         perror("getenv error");
     }
 }
 
+void change_color(const char *color) {
+    if (strcmp(color, "-green") == 0) {
+        strcpy(current_color, "\033[0;32m");  
+    } else if (strcmp(color, "-red") == 0) {
+        strcpy(current_color, "\033[0;31m"); 
+    } else if (strcmp(color, "-blue") == 0) {
+        strcpy(current_color, "\033[0;34m"); 
+    } else if (strcmp(color, "-yellow") == 0) {
+        strcpy(current_color, "\033[0;33m");  
+     } else if (strcmp(color, "-magenta") == 0) {
+        strcpy(current_color, "\033[0;35m");  
+    } else if (strcmp(color, "-cyan") == 0) {
+        strcpy(current_color, "\033[0;36m");  
+    } else if (strcmp(color, "reset") == 0) {
+        strcpy(current_color, "\033[0m");  
+    } else {
+        printf("Unknown color, for reset type color reset. Available: -green, -red, -blue, -yellow, -magenta, -cyan\n");
+    }
+}
+
+
 void cd(char *path) {
     if (path == NULL) {
         chdir(getenv("HOME"));
     } else {
         if (chdir(path) == -1) {
-            printf("No such file or directory\n");
+            perror("cd");
         } else {
             chdir(path);
         }
@@ -93,9 +117,15 @@ int main() {
             break;
         }
 
+        if (strncmp(input, "color", 5) == 0) {
+            char *color = input + 6;
+            change_color(color);  // Zmiana koloru
+        }
+
 
         if (strncmp(input, "cd", 2) == 0) {
-            char *path = input + 3;  // Ścieżka po "cd " (zakładając, że ścieżka zaczyna się po spacji)
+            char *path = (input + 3);  
+            printf("%s\n", path);
 
             if (*path == '\0') {
                 // samo cd 

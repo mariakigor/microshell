@@ -6,6 +6,7 @@
 #include <ctype.h> // do isspace()
 #include <readline/readline.h>  //bajery do historii i przegladania
 #include <readline/history.h>
+#include <errno.h>
 
 #define PATH_MAX 4096 
 #define MAX_INPUT 1024
@@ -26,7 +27,7 @@ void znak_zachety() {
     }
 }
 
-void change_color(const char *color) {
+void color(const char *color) {
     if (strcmp(color, "-green") == 0) {
         strcpy(current_color, "\033[0;32m");  
     } else if (strcmp(color, "-red") == 0) {
@@ -52,7 +53,14 @@ void cd(char *path) {
         chdir(getenv("HOME"));
     } else {
         if (chdir(path) == -1) {
-            perror("cd");
+            int number;
+            number = errno;
+            if (number == 2) {
+                printf("No such file or directory\n");
+            }
+            else if (number == 13) {
+                printf("Permision denied\n");
+            }
         } else {
             chdir(path);
         }
@@ -99,6 +107,33 @@ void cp(char *source_file, char *dest_file) {
 
 }
 
+void execute(char *input) {
+    char *command = strtok(input, " ");  // pierwsze slowo komenda
+    char *argument = strtok(NULL, " "); // reszta - argumenty
+
+    if (command == NULL) {
+        printf("\n");
+        return;
+    }
+
+    if (strcmp(command, "cd") == 0) {
+        cd(argument);
+    } else if (strcmp(command, "cp") == 0) {
+        char *dest_file = strtok(NULL, " ");
+        if (argument == NULL || dest_file == NULL) {
+        } else {
+            cp(argument, dest_file);
+        }
+    } else if (strcmp(command, "color") == 0) {
+        if (argument == NULL) {
+        } else {
+            color(argument);
+        }
+    } else {
+        printf("Unknown command. Bash will know.\n");
+    }
+}
+
 int main() {
     char *input;
 
@@ -121,29 +156,7 @@ int main() {
             break;
         }
 
-        if (strncmp(input, "color", 5) == 0) {
-            char *color = input + 6;
-            change_color(color);  // Zmiana koloru
-        }
-
-
-        if (strncmp(input, "cd", 2) == 0) {
-            char *path = (input + 3);  
-            printf("%s\n", path);
-
-            if (*path == '\0') {
-                // samo cd 
-                cd(NULL);
-            } else {
-                cd(path);
-            }
-        }
-        else if (strncmp(input, "cp", 2) == 0) {
-            char *source = strtok(input + 3, " "); // strtok dzieli na tokeny - mniejsze czesci stringa
-            char *destination = strtok(NULL, " ");
-
-            cp(source, destination);
-        }
+        execute(input);
 
         // dodawanie historii
         add_history(input);

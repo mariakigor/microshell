@@ -1,5 +1,6 @@
-microshell: microshell.c
-	gcc -Wall -std=c99 -o microshell microshell.c
+CC = gcc
+CFLAGS = -Wall
+LDFLAGS = -lreadline
 
-clean:
-	rm -f *.o microshell
+microshell: microshell.c
+	$(CC) $(CFLAGS) microshell.c -o microshell $(LDFLAGS)

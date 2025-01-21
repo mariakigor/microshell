@@ -7,6 +7,7 @@
 #include <readline/readline.h>  //bajery do historii i przegladania
 #include <readline/history.h>
 #include <errno.h>
+#include <sys/wait.h>
 
 #define PATH_MAX 4096 
 #define MAX_INPUT 1024
@@ -107,6 +108,7 @@ void cp(char *source_file, char *dest_file) {
 
 }
 
+
 void execute(char *input) {
     char *command = strtok(input, " ");  // pierwsze slowo komenda
     char *argument = strtok(NULL, " "); // reszta - argumenty
@@ -126,11 +128,50 @@ void execute(char *input) {
         }
     } else if (strcmp(command, "color") == 0) {
         if (argument == NULL) {
-        } else {
+        } 
+        else {
             color(argument);
-        }
+            }
+    } else if (strcmp(input, "help") == 0) {
+        printf("\nAuthor: Igor Mariak - 490065\n");
+        printf("-----------Available commands-----------\n\n");
+        printf("cd - change directory ex. cd /tmp\n");
+        printf("cp - copy file ex. cp FILE1 FILE2\n");
+        printf("color -argument ex. color -red\n");
+        printf("exit - quit the program\n\n");
+
     } else {
-        printf("Unknown command. Bash will know.\n");
+        printf("Unknown command. Bash can do it...\n\n");
+
+       // zewnetrzne programy
+        char *args[100];
+        int i = 0;
+        
+        // parsowanie
+        args[i] = command;
+        i++;
+        while (argument != NULL) {
+            args[i] = argument;
+            i++;
+            argument = strtok(NULL, " ");
+        }
+        args[i] = NULL; // ostatni element musi być NULL
+        
+        pid_t id = fork();  // nowy proces
+
+        if (id < 0) {
+            printf("Fork error: %d\n", errno);
+        } else if (id == 0) {
+            // proces potomny
+            execvp(args[0], args);  
+            if (errno == 2) {
+                printf("Even I cannot do it :( \n");
+            }
+            printf("Execvp error: %d\n", errno);
+            exit(1);  
+        } else {
+            wait(NULL);  // czeka na zakończenie procesu potomnego
+        }
     }
 }
 
@@ -145,13 +186,11 @@ int main() {
 
         // odczyt polecenia
         input = readline("");
-
         
 
         // usuwanie nowej lini
         input[strcspn(input, "\n")] = '\0';
 
-        // Gdy exit - koniec programu
         if (strcmp(input, "exit") == 0) {
             break;
         }

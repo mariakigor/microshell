@@ -11,7 +11,7 @@
 
 ### Dodatkowe
 - **Wyświetlanie loginu użytkownika i nazwę komputera**
-- **Zmiana koloru znaku zachęty**: Umożliwia użytkownikowi zmianę znaku zachęty.
+- **Zmiana koloru znaku zachęty**: Umożliwia użytkownikowi zmianę koloru znaku zachęty.
 - **Obsługa 2 dodatkowych komend**: 'cp' oraz 'grep'
 - **Auto-uzupełnianie i strzałki prawo-lewo**: Implementacja z wykorzystaniem biblioteki readline
 

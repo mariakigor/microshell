@@ -10,13 +10,16 @@
 - **obsługa pozostałych poleceń ze zmiennej środowiskowej PATH za pomocą fork() i exec()**
 
 ### Dodatkowe
-- **Wyświetlanie loginu użytkownika**
-- **Zmiana koloru znaku zachęty**: Umożliwia użytkownikowi zmianę koloru tekstu w terminalu.
+- **Wyświetlanie loginu użytkownika i nazwę komputera**
+- **Zmiana koloru znaku zachęty**: Umożliwia użytkownikowi zmianę znaku zachęty.
 - **Obsługa 2 dodatkowych komend**: 'cp' oraz 'grep'
-- **Historia poleceń i auto-uzupełnianie**: Implementacja z wykorzystaniem biblioteki readline
+- **Auto-uzupełnianie i strzałki prawo-lewo**: Implementacja z wykorzystaniem biblioteki readline
 
-## Kompilacja
-make 
+## Uruchamianie
+Kompilacja:
+
+make
+
 ./microshell
 
 

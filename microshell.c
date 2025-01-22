@@ -8,6 +8,7 @@
 #include <readline/history.h>
 #include <errno.h>
 #include <sys/wait.h>
+#include <signal.h> // ctrl c
 
 #define PATH_MAX 4096 
 #define MAX_INPUT 1024
@@ -220,6 +221,7 @@ void execute(char *input) {
             printf("Fork error: %d\n", errno);
         } else if (id == 0) {
             // proces potomny
+            signal(SIGINT, SIG_DFL); // terminal interupt signal
             execvp(args[0], args);  
             if (errno == 2) {
                 printf("Even I cannot do it :( \n");
@@ -227,6 +229,7 @@ void execute(char *input) {
             printf("Execvp error: %d\n", errno);
             exit(1);  
         } else {
+            signal(SIGINT, SIG_IGN); //ignorowanie sygnaly
             wait(NULL);  // czeka na zakończenie procesu potomnego
         }
     }

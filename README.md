@@ -1,25 +1,25 @@
-# Microshell - Igor Mariak 490065
+# Microshell - Igor Mariak 
 
-## Komendy i funkcje
+## Commands and Features
 
-### Wymagane:
-- **wyświetlanie znaku zachęty**
-- **obsługa polecenia cd**
-- **polecenie exit kończące działanie programu**
-- **polecenie help - informacje o programie**
-- **obsługa pozostałych poleceń ze zmiennej środowiskowej PATH za pomocą fork() i exec()**
+### Basic
+- **display of the command prompt**
+- **support for the cd command**
+- **exit command to terminate the program**
+- **help command - information about the program**
+- **execution of other commands from the PATH environment variable using fork() and exec()**
 
-### Dodatkowe
-- **Wyświetlanie loginu użytkownika i nazwę komputera**
-- **Zmiana koloru znaku zachęty**: Umożliwia użytkownikowi zmianę koloru znaku zachęty.
-- **Obsługa 2 dodatkowych komend**: 'cp' oraz 'grep'
-- **Auto-uzupełnianie i strzałki prawo-lewo**: Implementacja z wykorzystaniem biblioteki readline
+### Additional
+- **display of the user's login and computer name**
+- **prompt color change**: Allows the user to customize the prompt color.
+- **support for 2 additional commands**: 'cp' and 'grep'
+- **Auto-completion and left/right arrow navigation**: Implemented using the readline library.
 
-## Uruchamianie
-Kompilacja:
+## Running the program
+To compile: 
+**make**
 
-make
-
-./microshell
+Then run:
+**./microshell**
 
 

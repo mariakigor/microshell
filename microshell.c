@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>  //  Do getcwd(), wyswietla aktualna sciezke
-#include <stdlib.h> // Do getenv()
-#include <fcntl.h> // otwieranie plikow
-#include <ctype.h> // do isspace()
-#include <readline/readline.h>  //bajery do historii i przegladania
+#include <unistd.h>  //  for getcwd()
+#include <stdlib.h> // for getenv()
+#include <fcntl.h> // file open
+#include <ctype.h> // isspace()
+#include <readline/readline.h>  
 #include <readline/history.h>
 #include <errno.h>
 #include <sys/wait.h>
@@ -15,33 +15,33 @@
 
 char current_color[20] = "\033[0m";
 
-void znak_zachety() {
-    char buf[PATH_MAX]; // Bufor dla sciezki 
+void command_prompt() {
+    char buf[PATH_MAX]; 
 
-    const char *user = getenv("LOGNAME"); // uzytkownik
-    const char *host = getenv("NAME"); //host
+    const char *user = getenv("LOGNAME"); // user
+    const char *host = getenv("NAME"); // host
 
     if ((getcwd(buf, sizeof(buf)) != NULL) && (user != NULL) && (host != NULL)) {
-        printf("%s%s@%s:[%s] %s$%s", current_color, user, host, buf, current_color, "\033[0m"); // Funkcja zapisuje ścieżkę do bufora
+        printf("%s%s@%s:[%s] %s$%s", current_color, user, host, buf, current_color, "\033[0m"); // function to store path 
     } else {
-        perror("getcwd error"); // Obsługa błędu
+        perror("getcwd error"); // error handle
         perror("getenv error");
     }
 }
 
 
 void color(const char *color) {
-    if (strcmp(color, "-green") == 0) {
+    if (strcmp(color, "--green") == 0) {
         strcpy(current_color, "\033[0;32m");  
-    } else if (strcmp(color, "-red") == 0) {
+    } else if (strcmp(color, "--red") == 0) {
         strcpy(current_color, "\033[0;31m"); 
-    } else if (strcmp(color, "-blue") == 0) {
+    } else if (strcmp(color, "--blue") == 0) {
         strcpy(current_color, "\033[0;34m"); 
-    } else if (strcmp(color, "-yellow") == 0) {
+    } else if (strcmp(color, "--yellow") == 0) {
         strcpy(current_color, "\033[0;33m");  
-     } else if (strcmp(color, "-magenta") == 0) {
+     } else if (strcmp(color, "--magenta") == 0) {
         strcpy(current_color, "\033[0;35m");  
-    } else if (strcmp(color, "-cyan") == 0) {
+    } else if (strcmp(color, "--cyan") == 0) {
         strcpy(current_color, "\033[0;36m");  
     } else if (strcmp(color, "reset") == 0) {
         strcpy(current_color, "\033[0m");  
@@ -51,6 +51,7 @@ void color(const char *color) {
 }
 
 
+// cd command
 void cd(char *path) {
     if (path == NULL) {
         chdir(getenv("HOME"));
@@ -75,6 +76,7 @@ void cd(char *path) {
 
 }
 
+// cp command
 void cp(char *source_file, char *dest_file) {
     if (source_file == NULL) {
         printf("Missing source file\n");
@@ -88,7 +90,7 @@ void cp(char *source_file, char *dest_file) {
     char buffer[4096];
     int bytes;
 
-    // plik zrodlowy
+    // source file
     file = open(source_file, O_RDONLY);
     if (file == -1) {
         printf("Cannot open source file\n");
@@ -96,8 +98,8 @@ void cp(char *source_file, char *dest_file) {
         return;
     }
 
-    // plik docelowy
-    new_file = open(dest_file, O_WRONLY | O_CREAT, 0644);  // O_CREAT wymaga uprawnien 0 specjalne wlasciciel (6 - rw_), grupa (4 - r__), inni (4-r__)
+    // destination file
+    new_file = open(dest_file, O_WRONLY | O_CREAT, 0644);  // O_CREAT needs privilege 0 owner (6 - rw_), group (4 - r__), others (4-r__)
     if (new_file == -1) {
         printf("Cannot create destiantion file\n");
         close(new_file);
@@ -113,6 +115,7 @@ void cp(char *source_file, char *dest_file) {
 
 }
 
+// grep command
 void grep_command(char *pattern, char *f) {
     if (pattern == NULL || f == NULL) {
         printf("Try grep PATTERN FILE\n");
@@ -127,11 +130,11 @@ void grep_command(char *pattern, char *f) {
 
     char line[1024];
     int line_number = 1;
-    const char *start = "\033[1;31m"; // kolor dla znalezionego
-    const char *end = "\033[0m"; // reset koloru
+    const char *start = "\033[1;31m"; // color found
+    const char *end = "\033[0m"; // color reset
 
     while (fgets(line, sizeof(line), file) != NULL) {
-        char *match = strstr(line, pattern); // pierwsze wystąpienie wzorca
+        char *match = strstr(line, pattern); // first occurance of a pattern
         if (match != NULL) {
             printf("Line %d: ", line_number); 
 
@@ -147,7 +150,7 @@ void grep_command(char *pattern, char *f) {
                 match = strstr(current, pattern);
             }
 
-            // reszta lini
+            // rest
             printf("%s", current);
         }
         line_number++;
@@ -157,19 +160,19 @@ void grep_command(char *pattern, char *f) {
 }
 
 void help() {
-    printf("\nAuthor: Igor Mariak - 490065\n");
+    printf("\nAuthor: Igor Mariak\n");
     printf("-----------Available commands-----------\n\n");
     printf("cd /path - change directory | ex. cd /tmp\n");
     printf("cp FILE1 FILE2- copy file | ex. cp one.txt two.txt\n");
     printf("grep PATTERN FILE | ex. grep qui lorem.txt\n");
-    printf("color -argument | ex. color -red\n");
+    printf("color --argument | ex. color --red\n");
     printf("exit - quit the program\n\n");
 }
 
 
 void execute(char *input) {
-    char *command = strtok(input, " ");  // pierwsze slowo komenda
-    char *argument = strtok(NULL, " "); // reszta - argumenty
+    char *command = strtok(input, " ");  // first word - command
+    char *argument = strtok(NULL, " "); // rest - arguments
 
     if (command == NULL) {
         printf("\n");
@@ -201,11 +204,11 @@ void execute(char *input) {
     } else {
         printf("Unknown command. Bash can do it...\n\n");
 
-       // zewnetrzne programy
+       // other programs
         char *args[100];
         int i = 0;
         
-        // parsowanie
+        // parse
         args[i] = command;
         i++;
         while (argument != NULL) {
@@ -213,14 +216,14 @@ void execute(char *input) {
             i++;
             argument = strtok(NULL, " ");
         }
-        args[i] = NULL; // ostatni element musi być NULL
+        args[i] = NULL; // last element must be NULL
         
-        pid_t id = fork();  // nowy proces
+        pid_t id = fork();  // new process
 
         if (id < 0) {
             printf("Fork error: %d\n", errno);
         } else if (id == 0) {
-            // proces potomny
+            // child process
             signal(SIGINT, SIG_DFL); // terminal interupt signal
             execvp(args[0], args);  
             if (errno == 2) {
@@ -229,8 +232,8 @@ void execute(char *input) {
             printf("Execvp error: %d\n", errno);
             exit(1);  
         } else {
-            signal(SIGINT, SIG_IGN); //ignorowanie sygnaly
-            wait(NULL);  // czeka na zakończenie procesu potomnego
+            signal(SIGINT, SIG_IGN); // signal ignore to not stop the microshell
+            wait(NULL);  // wait for the child process 
         }
     }
 }
@@ -238,22 +241,16 @@ void execute(char *input) {
 int main() {
     char *input;
 
-    read_history("history.txt"); //wczytanie historii
-    rl_initialize();
-    using_history();
-
     help();
 
 
     while(1) {
 
-        znak_zachety();
+        command_prompt();
 
-        // odczyt polecenia
         input = readline(" ");
         
-
-        // usuwanie nowej lini
+        // delete new line
         input[strcspn(input, "\n")] = '\0';
 
         if (strcmp(input, "exit") == 0) {
@@ -261,10 +258,6 @@ int main() {
         }
 
         execute(input);
-
-        // dodawanie historii
-        add_history(input);
-        write_history("history.txt");
 
         free(input);
 

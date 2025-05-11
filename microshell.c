@@ -46,7 +46,7 @@ void color(const char *color) {
     } else if (strcmp(color, "reset") == 0) {
         strcpy(current_color, "\033[0m");  
     } else {
-        printf("Unknown color, for reset type color reset. Available: -green, -red, -blue, -yellow, -magenta, -cyan\n");
+        printf("Unknown color, for reset type color reset. Available: --green, --red, --blue, --yellow, --magenta, --cyan\n");
     }
 }
 
@@ -224,7 +224,7 @@ void execute(char *input) {
             printf("Fork error: %d\n", errno);
         } else if (id == 0) {
             // child process
-            signal(SIGINT, SIG_DFL); // terminal interupt signal
+            signal(SIGINT, SIG_DFL); // terminal interrupt signal
             execvp(args[0], args);  
             if (errno == 2) {
                 printf("Even I cannot do it :( \n");
